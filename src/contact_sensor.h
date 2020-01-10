@@ -1,4 +1,3 @@
-#ifndef CONTACT_SENSOR_H_
 #pragma once
 
 typedef enum {
@@ -11,6 +10,3 @@ typedef void (*contact_sensor_callback_fn)(uint8_t gpio_num, contact_sensor_stat
 int contact_sensor_create(uint8_t gpio_num, contact_sensor_callback_fn callback);
 void contact_sensor_destroy(uint8_t gpio_num);
 contact_sensor_state_t contact_sensor_state_get(uint8_t gpio_num);
-
-
-#endif /* CONTACT_SENSOR_H_ */

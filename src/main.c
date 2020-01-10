@@ -36,7 +36,7 @@ void led_write(bool on) {
 
 void show_config() {
     printf(">>> Initial config <<<\n");
-    printf(">> Lock GPIO: %d\n", GPIO_RELAY);
+    printf(">> Door Lock GPIO: %d\n", GPIO_RELAY);
     printf(">> Led GPIO: %d\n", GPIO_LED);
     printf(">> Unlock period: %d s\n", UNLOCK_PERIOD);
     printf(">> ------------------------------------------\n");
@@ -44,8 +44,8 @@ void show_config() {
     printf(">> Button long press timeout %d ms\n", BUTTON_LONG_PRESS_TIMEOUT);
     printf(">> Button bounced time: %d ms\n", BUTTON_DEBOUNCED_TIME);
     printf(">> ------------------------------------------\n");
-    printf(">> Bell GPIO: %d\n", GPIO_BELL);
-    printf(">> Bell bounced interval: %d ms\n", BELL_DEBOUNCED_TIME);
+    printf(">> Doorbell GPIO: %d\n", GPIO_BELL);
+    printf(">> Doorbell bounced interval: %d ms\n", BELL_DEBOUNCED_TIME);
     printf(">> ------------------------------------------\n");
     printf(">> HomeKit setup id: %s\n", HOMEKIT_SETUP_ID);
     printf(">> HomeKit password: %s\n", HOMEKIT_PASSWORD);
@@ -109,7 +109,7 @@ void button_callback(uint8_t gpio, button_event_t event) {
 }
 
 void lock_identify_task(void *_args) {
-    // We identify the Sonoff by Flashing it's LED.
+    // We identify the device by Flashing it's LED.
     for (int i=0; i<3; i++) {
         for (int j=0; j<2; j++) {
             led_write(true);
@@ -127,10 +127,14 @@ void lock_identify_task(void *_args) {
 }
 
 void lock_identify(homekit_value_t _value) {
-    printf("> Doorman identify\n");
+    printf("> Lock identify\n");
     xTaskCreate(lock_identify_task, "Lock identify", 128, NULL, 2, NULL);
 }
 
+void doorbell_identify(homekit_value_t _value) {
+    printf("> Bell identify\n");
+    xTaskCreate(lock_identify_task, "Lock identify", 128, NULL, 2, NULL);
+}
 
 typedef enum {
     lock_state_unsecured = 0,
@@ -171,19 +175,17 @@ void lock_control_point(homekit_value_t value) {
 /**
  * Returns the bell state as a homekit value.
  **/
-homekit_value_t bell_state_getter() {
-    printf(">> Bell state was requested (%s).\n", contact_sensor_state_get(GPIO_BELL) == CONTACT_OPEN ? "open" : "closed");
+homekit_value_t doorbell_state_getter() {
+    printf(">> Doorbell state was requested (%s).\n", contact_sensor_state_get(GPIO_BELL) == CONTACT_OPEN ? "open" : "closed");
     return HOMEKIT_UINT8(contact_sensor_state_get(GPIO_BELL) == CONTACT_OPEN ? 1 : 0);
 }
+
 
 /**
  * The sensor characteristic as global variable.
  **/
-homekit_characteristic_t bell_push_characteristic = HOMEKIT_CHARACTERISTIC_(AUDIO_FEEDBACK, 0,
-    .getter=bell_state_getter,
-    .setter=NULL,
-    NULL
-);
+homekit_characteristic_t doorbell_push_characteristic = HOMEKIT_CHARACTERISTIC_(OCCUPANCY_DETECTED, 0);
+
 
 /**
  * Called (indirectly) from the interrupt handler to notify the client of a state change.
@@ -192,8 +194,8 @@ void contact_sensor_callback(uint8_t gpio, contact_sensor_state_t state) {
     switch (state) {
         case CONTACT_OPEN:
         case CONTACT_CLOSED:
-            printf(">> Pushing bell state '%s'.\n", state == CONTACT_OPEN ? "open" : "closed");
-            homekit_characteristic_notify(&bell_push_characteristic, bell_state_getter());
+            // printf(">> Pushing bell state '%s'.\n", state == CONTACT_OPEN ? "ringing" : "silence");
+            homekit_characteristic_notify(&doorbell_push_characteristic, doorbell_state_getter());
             break;
         default:
             printf(">> Unknown bell event: %d\n", state);
@@ -226,7 +228,7 @@ void lock_timeout() {
 void lock_init() {
     lock_current_state.value = HOMEKIT_UINT8(lock_state_secured);
     homekit_characteristic_notify(&lock_current_state, lock_current_state.value);
-    homekit_characteristic_notify(&bell_push_characteristic, bell_state_getter());
+    homekit_characteristic_notify(&doorbell_push_characteristic, doorbell_state_getter());
 
     sdk_os_timer_disarm(&lock_timer);
     sdk_os_timer_setfn(&lock_timer, lock_timeout, NULL);
@@ -250,14 +252,14 @@ homekit_accessory_t *accessories[] = {
         HOMEKIT_SERVICE(ACCESSORY_INFORMATION, .characteristics=(homekit_characteristic_t*[]){
             &name,
             HOMEKIT_CHARACTERISTIC(MANUFACTURER, "zokl@2020"),
-            HOMEKIT_CHARACTERISTIC(SERIAL_NUMBER, "123456"),
-            HOMEKIT_CHARACTERISTIC(MODEL, "Fermax Doorman"),
+            // HOMEKIT_CHARACTERISTIC(SERIAL_NUMBER, "123456"),
+            HOMEKIT_CHARACTERISTIC(MODEL, "Door Lock"),
             HOMEKIT_CHARACTERISTIC(FIRMWARE_REVISION, "1.0"),
             HOMEKIT_CHARACTERISTIC(IDENTIFY, lock_identify),
             NULL
         }),
         HOMEKIT_SERVICE(LOCK_MECHANISM, .primary=true, .characteristics=(homekit_characteristic_t*[]){
-            HOMEKIT_CHARACTERISTIC(NAME, "Doorman"),
+            HOMEKIT_CHARACTERISTIC(NAME, "Lock"),
             &lock_current_state,
             &lock_target_state,
             NULL
@@ -267,11 +269,29 @@ homekit_accessory_t *accessories[] = {
                 .setter=lock_control_point
             ),
             HOMEKIT_CHARACTERISTIC(VERSION, "1"),
-            &bell_push_characteristic,
             NULL
         }),
         NULL
     }),
+
+    HOMEKIT_ACCESSORY(.id=2, .category=homekit_accessory_category_switch, .services=(homekit_service_t*[]){
+        HOMEKIT_SERVICE(ACCESSORY_INFORMATION, .characteristics=(homekit_characteristic_t*[]){
+            // HOMEKIT_CHARACTERISTIC(NAME, "Home Bell"),
+            HOMEKIT_CHARACTERISTIC(MANUFACTURER, "zokl@2020"),
+            // HOMEKIT_CHARACTERISTIC(SERIAL_NUMBER, "0012346"),
+            HOMEKIT_CHARACTERISTIC(MODEL, "Doorbell"),
+            HOMEKIT_CHARACTERISTIC(FIRMWARE_REVISION, "1.0"),
+            HOMEKIT_CHARACTERISTIC(IDENTIFY, doorbell_identify),
+            NULL
+        }),
+        HOMEKIT_SERVICE(OCCUPANCY_SENSOR, .primary=true, .characteristics=(homekit_characteristic_t*[]){
+            HOMEKIT_CHARACTERISTIC(NAME, "Doorbell"),
+            &doorbell_push_characteristic,
+            NULL
+        }),
+        NULL
+    }),
+
     NULL
 };
 
