@@ -1,5 +1,5 @@
 # homekit-doorman
-System of doorbell integration into HomeKit
+System of a doorbell and smart lock integration into Apple HomeKit.
 
 
 ## Compilation and deployment
