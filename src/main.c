@@ -19,43 +19,27 @@
 #include <homekit/characteristics.h>
 #include <wifi_config.h>
 
+#include "config.h"
 #include "button.h"
 #include "contact_sensor.h"
-
-// The GPIO pin that is connected to a relay
-const int relay_gpio = 5; // WeMos D1 Mini - Pin D1
-// The GPIO pin that is connected to a LED
-// const int led_gpio = 13;
-const int led_gpio = 2; //WeMos D1 Mini - Pin Internal LED (Blue)
-// The GPIO pin that is connected to a button
-// const int button_gpio = 0;
-const int button_gpio = 15; // WeMos D1 Mini - Pin D5
-// The GPIO pin that is connected to a door bell
-// const int button_gpio = 4;
-const int bell_gpio = 4; // WeMos D1 Mini - Pin D2
-
-// Timeout in seconds to open lock for
-const int unlock_period = 5;  // 5 seconds
-// Which signal to send to relay to open the lock (0 or 1)
-const int relay_open_signal = 1;
 
 void lock_lock();
 void lock_unlock();
 
 void relay_write(int value) {
-    gpio_write(relay_gpio, value ? 1 : 0);
+    gpio_write(GPIO_RELAY, value ? 1 : 0);
 }
 
 void led_write(bool on) {
-    gpio_write(led_gpio, on ? 0 : 1);
+    gpio_write(GPIO_LED, on ? 0 : 1);
 }
 
 void show_config() {
-    printf(">> Relay GPIO: %d\n", relay_gpio);
-    printf(">> Led GPIO: %d\n", led_gpio);
-    printf(">> Button GPIO: %d\n", button_gpio);
-    printf(">> Bell GPIO: %d\n", bell_gpio);
-    printf(">> Unlock period: %d s\n", unlock_period);    
+    printf(">> Relay GPIO: %d\n", GPIO_RELAY);
+    printf(">> Led GPIO: %d\n", GPIO_LED);
+    printf(">> Button GPIO: %d\n", GPIO_BUTTON);
+    printf(">> Bell GPIO: %d\n", GPIO_BELL);
+    printf(">> Unlock period: %d s\n", UNLOCK_PERIOD);    
 }
 
 void reset_configuration_task() {
@@ -92,17 +76,17 @@ void reset_configuration() {
 }
 
 void gpio_init() {
-    gpio_enable(led_gpio, GPIO_OUTPUT);
+    gpio_enable(GPIO_LED, GPIO_OUTPUT);
     led_write(false);
 
-    gpio_enable(relay_gpio, GPIO_OUTPUT);
-    relay_write(!relay_open_signal);
+    gpio_enable(GPIO_RELAY, GPIO_OUTPUT);
+    relay_write(!RELAY_OPEN_SIGNAL);
 }
 
 void button_callback(uint8_t gpio, button_event_t event) {
     switch (event) {
         case button_event_single_press:
-            printf("Toggling relay\n");
+            printf(">> Toggling relay <<\n");
             lock_unlock();
             break;
         case button_event_long_press:
@@ -178,14 +162,14 @@ void lock_control_point(homekit_value_t value) {
  * Returns the bell state as a homekit value.
  **/
 homekit_value_t bell_state_getter() {
-    printf("Bell state was requested (%s).\n", contact_sensor_state_get(bell_gpio) == CONTACT_OPEN ? "open" : "closed");
-    return HOMEKIT_UINT8(250);
+    printf("Bell state was requested (%s).\n", contact_sensor_state_get(GPIO_BELL) == CONTACT_OPEN ? "open" : "closed");
+    return HOMEKIT_UINT8(contact_sensor_state_get(GPIO_BELL) == CONTACT_OPEN ? 1 : 0);
 }
 
 /**
  * The sensor characteristic as global variable.
  **/
-homekit_characteristic_t bell_push_characteristic = HOMEKIT_CHARACTERISTIC_(MOTION_DETECTED, 0,
+homekit_characteristic_t bell_push_characteristic = HOMEKIT_CHARACTERISTIC_(AUDIO_FEEDBACK, 0,
     .getter=bell_state_getter,
     .setter=NULL,
     NULL
@@ -211,7 +195,7 @@ ETSTimer lock_timer;
 void lock_lock() {
     sdk_os_timer_disarm(&lock_timer);
 
-    relay_write(!relay_open_signal);
+    relay_write(!RELAY_OPEN_SIGNAL);
     led_write(false);
 
     if (lock_current_state.value.int_value != lock_state_secured) {
@@ -232,21 +216,22 @@ void lock_timeout() {
 void lock_init() {
     lock_current_state.value = HOMEKIT_UINT8(lock_state_secured);
     homekit_characteristic_notify(&lock_current_state, lock_current_state.value);
+    homekit_characteristic_notify(&bell_push_characteristic, bell_state_getter());
 
     sdk_os_timer_disarm(&lock_timer);
     sdk_os_timer_setfn(&lock_timer, lock_timeout, NULL);
 }
 
 void lock_unlock() {
-    relay_write(relay_open_signal);
+    relay_write(RELAY_OPEN_SIGNAL);
     led_write(true);
 
     lock_current_state.value = HOMEKIT_UINT8(lock_state_unsecured);
     homekit_characteristic_notify(&lock_current_state, lock_current_state.value);
 
-    if (unlock_period) {
+    if (UNLOCK_PERIOD) {
         sdk_os_timer_disarm(&lock_timer);
-        sdk_os_timer_arm(&lock_timer, unlock_period * 1000, 0);
+        sdk_os_timer_arm(&lock_timer, UNLOCK_PERIOD * 1000, 0);
     }
 }
 
@@ -312,14 +297,12 @@ void user_init(void) {
     gpio_init();
     lock_init();
 
-    if (button_create(button_gpio, 0, 10000, button_callback)) {
+    if (button_create(GPIO_BUTTON, 0, 10000, button_callback)) {
         printf("Failed to initialize button\n");
     }
 
-    printf("Using bell at GPIO%d.\n", bell_gpio);
-    if (contact_sensor_create(bell_gpio, contact_sensor_callback)) {
+    printf("Using bell at GPIO%d.\n", GPIO_BELL);
+    if (contact_sensor_create(GPIO_BELL, contact_sensor_callback)) {
         printf("Failed to initialize bell\n");
     }
-
-    homekit_characteristic_notify(&bell_push_characteristic, bell_state_getter());
 }

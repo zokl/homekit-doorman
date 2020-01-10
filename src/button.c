@@ -1,6 +1,7 @@
 #include <string.h>
 #include <esplibs/libmain.h>
 #include "button.h"
+#include "config.h"
 
 typedef struct _button {
     uint8_t gpio_num;
@@ -66,7 +67,7 @@ int button_create(const uint8_t gpio_num, bool pressed_value, uint16_t long_pres
     button->pressed_value = pressed_value;
 
     // times in milliseconds
-    button->debounce_time = 50;
+    button->debounce_time = BUTTON_DEBOUNCED_TIME;
     button->long_press_time = long_press_time;
 
     uint32_t now = xTaskGetTickCountFromISR();
