@@ -8,7 +8,7 @@
 
 // The GPIO pin that is connected to a button
 // const int button_gpio = 0;
-#define GPIO_BUTTON 15 // WeMos D1 Mini - Pin D8
+#define GPIO_BUTTON 14 // WeMos D1 Mini - Pin D8
 
 // The GPIO pin that is connected to a door bell
 // const int button_gpio = 4;
@@ -20,6 +20,11 @@
 // Which signal to send to relay to open the lock (0 or 1)
 #define RELAY_OPEN_SIGNAL 1
 
+// The expected value when the button is pressed. 
+// For buttons connected to ground this is 0/false, 
+// for other buttons this might be 1/true.
+#define BUTTON_PRESSED_EXPECTED_VALUE 0
+
 // Button timeout for log press in ms
 #define BUTTON_LONG_PRESS_TIMEOUT 10000
 
@@ -27,7 +32,7 @@
 #define BUTTON_DEBOUNCED_TIME 50
 
 // Bell signal debounced time in ms
-#define BELL_DEBOUNCED_TIME 500
+#define BELL_DEBOUNCED_TIME 1000
 
 #define HOMEKIT_PASSWORD "111-11-111"
 #define HOMEKIT_SETUP_ID "1QJ9"

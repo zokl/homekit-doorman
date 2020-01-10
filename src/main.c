@@ -35,16 +35,21 @@ void led_write(bool on) {
 }
 
 void show_config() {
-    printf(">>> Initial config <<<");
-    printf(">> Relay GPIO: %d\n", GPIO_RELAY);
+    printf(">>> Initial config <<<\n");
+    printf(">> Lock GPIO: %d\n", GPIO_RELAY);
     printf(">> Led GPIO: %d\n", GPIO_LED);
-    printf(">> Button GPIO: %d\n", GPIO_BUTTON);
-    printf(">> Bell GPIO: %d\n", GPIO_BELL);
     printf(">> Unlock period: %d s\n", UNLOCK_PERIOD);
+    printf(">> ------------------------------------------\n");
+    printf(">> Button GPIO: %d\n", GPIO_BUTTON);
     printf(">> Button long press timeout %d ms\n", BUTTON_LONG_PRESS_TIMEOUT);
+    printf(">> Button bounced time: %d ms\n", BUTTON_DEBOUNCED_TIME);
+    printf(">> ------------------------------------------\n");
+    printf(">> Bell GPIO: %d\n", GPIO_BELL);
+    printf(">> Bell bounced interval: %d ms\n", BELL_DEBOUNCED_TIME);
+    printf(">> ------------------------------------------\n");
     printf(">> HomeKit setup id: %s\n", HOMEKIT_SETUP_ID);
     printf(">> HomeKit password: %s\n", HOMEKIT_PASSWORD);
-    printf("--------------------------------------------");
+    printf(">> ------------------------------------------\n\n");
 }
 
 void reset_configuration_task() {
@@ -302,7 +307,7 @@ void user_init(void) {
     gpio_init();
     lock_init();
 
-    if (button_create(GPIO_BUTTON, 0, BUTTON_LONG_PRESS_TIMEOUT, button_callback)) {
+    if (button_create(GPIO_BUTTON, BUTTON_PRESSED_EXPECTED_VALUE, BUTTON_LONG_PRESS_TIMEOUT, button_callback)) {
         printf("> Failed to initialize button\n");
     }
 
