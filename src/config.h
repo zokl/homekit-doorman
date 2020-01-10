@@ -20,8 +20,15 @@
 // Which signal to send to relay to open the lock (0 or 1)
 #define RELAY_OPEN_SIGNAL 1
 
+// Button timeout for log press in ms
+#define BUTTON_LONG_PRESS_TIMEOUT 10000
+
 // Button signal debounced time in ms
 #define BUTTON_DEBOUNCED_TIME 50
 
 // Bell signal debounced time in ms
 #define BELL_DEBOUNCED_TIME 500
+
+#define HOMEKIT_PASSWORD "111-11-111"
+#define HOMEKIT_SETUP_ID "1QJ9"
+

@@ -35,11 +35,16 @@ void led_write(bool on) {
 }
 
 void show_config() {
+    printf(">>> Initial config <<<");
     printf(">> Relay GPIO: %d\n", GPIO_RELAY);
     printf(">> Led GPIO: %d\n", GPIO_LED);
     printf(">> Button GPIO: %d\n", GPIO_BUTTON);
     printf(">> Bell GPIO: %d\n", GPIO_BELL);
-    printf(">> Unlock period: %d s\n", UNLOCK_PERIOD);    
+    printf(">> Unlock period: %d s\n", UNLOCK_PERIOD);
+    printf(">> Button long press timeout %d ms\n", BUTTON_LONG_PRESS_TIMEOUT);
+    printf(">> HomeKit setup id: %s\n", HOMEKIT_SETUP_ID);
+    printf(">> HomeKit password: %s\n", HOMEKIT_PASSWORD);
+    printf("--------------------------------------------");
 }
 
 void reset_configuration_task() {
@@ -51,19 +56,19 @@ void reset_configuration_task() {
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 
-    printf("Resetting Wifi Config\n");
+    printf("> Resetting Wifi Config\n");
 
     wifi_config_reset();
 
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-    printf("Resetting HomeKit Config\n");
+    printf("> Resetting HomeKit Config\n");
 
     homekit_server_reset();
 
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-    printf("Restarting\n");
+    printf("> Restarting\n");
 
     sdk_system_restart();
 
@@ -71,7 +76,7 @@ void reset_configuration_task() {
 }
 
 void reset_configuration() {
-    printf("Resetting configuration\n");
+    printf("> Resetting configuration\n");
     xTaskCreate(reset_configuration_task, "Reset configuration", 256, NULL, 2, NULL);
 }
 
@@ -94,7 +99,7 @@ void button_callback(uint8_t gpio, button_event_t event) {
             reset_configuration();
             break;
         default:
-            printf("Unknown button event: %d\n", event);
+            printf(">> Unknown button event: %d\n", event);
     }
 }
 
@@ -117,7 +122,7 @@ void lock_identify_task(void *_args) {
 }
 
 void lock_identify(homekit_value_t _value) {
-    printf("Doorman identify\n");
+    printf("> Doorman identify\n");
     xTaskCreate(lock_identify_task, "Lock identify", 128, NULL, 2, NULL);
 }
 
@@ -162,7 +167,7 @@ void lock_control_point(homekit_value_t value) {
  * Returns the bell state as a homekit value.
  **/
 homekit_value_t bell_state_getter() {
-    printf("Bell state was requested (%s).\n", contact_sensor_state_get(GPIO_BELL) == CONTACT_OPEN ? "open" : "closed");
+    printf(">> Bell state was requested (%s).\n", contact_sensor_state_get(GPIO_BELL) == CONTACT_OPEN ? "open" : "closed");
     return HOMEKIT_UINT8(contact_sensor_state_get(GPIO_BELL) == CONTACT_OPEN ? 1 : 0);
 }
 
@@ -182,11 +187,11 @@ void contact_sensor_callback(uint8_t gpio, contact_sensor_state_t state) {
     switch (state) {
         case CONTACT_OPEN:
         case CONTACT_CLOSED:
-            printf("Pushing bell state '%s'.\n", state == CONTACT_OPEN ? "open" : "closed");
+            printf(">> Pushing bell state '%s'.\n", state == CONTACT_OPEN ? "open" : "closed");
             homekit_characteristic_notify(&bell_push_characteristic, bell_state_getter());
             break;
         default:
-            printf("Unknown bell event: %d\n", state);
+            printf(">> Unknown bell event: %d\n", state);
     }
 }
 
@@ -242,7 +247,7 @@ homekit_accessory_t *accessories[] = {
             HOMEKIT_CHARACTERISTIC(MANUFACTURER, "zokl@2020"),
             HOMEKIT_CHARACTERISTIC(SERIAL_NUMBER, "123456"),
             HOMEKIT_CHARACTERISTIC(MODEL, "Fermax Doorman"),
-            HOMEKIT_CHARACTERISTIC(FIRMWARE_REVISION, "0.1"),
+            HOMEKIT_CHARACTERISTIC(FIRMWARE_REVISION, "1.0"),
             HOMEKIT_CHARACTERISTIC(IDENTIFY, lock_identify),
             NULL
         }),
@@ -267,8 +272,8 @@ homekit_accessory_t *accessories[] = {
 
 homekit_server_config_t config = {
     .accessories = accessories,
-    .password = "111-11-111",
-    .setupId="1QJ9",
+    .password = HOMEKIT_PASSWORD,
+    .setupId = HOMEKIT_SETUP_ID,
 };
 
 void on_wifi_ready() {
@@ -289,7 +294,7 @@ void create_accessory_name() {
 }
 
 void user_init(void) {
-    uart_set_baud(0, 115200);
+    uart_set_baud(0, 9600);
     show_config();
     create_accessory_name();
 
@@ -297,12 +302,11 @@ void user_init(void) {
     gpio_init();
     lock_init();
 
-    if (button_create(GPIO_BUTTON, 0, 10000, button_callback)) {
-        printf("Failed to initialize button\n");
+    if (button_create(GPIO_BUTTON, 0, BUTTON_LONG_PRESS_TIMEOUT, button_callback)) {
+        printf("> Failed to initialize button\n");
     }
 
-    printf("Using bell at GPIO%d.\n", GPIO_BELL);
     if (contact_sensor_create(GPIO_BELL, contact_sensor_callback)) {
-        printf("Failed to initialize bell\n");
+        printf("> Failed to initialize bell\n");
     }
 }
