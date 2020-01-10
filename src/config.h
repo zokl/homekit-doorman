@@ -34,6 +34,6 @@
 // Bell signal debounced time in ms
 #define BELL_DEBOUNCED_TIME 1000
 
-#define HOMEKIT_PASSWORD "111-11-111"
+#define HOMEKIT_PASSWORD "250-68-300"
 #define HOMEKIT_SETUP_ID "1QJ9"
 
