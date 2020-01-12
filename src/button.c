@@ -42,6 +42,7 @@ void button_intr_callback(uint8_t gpio) {
         return;
     }
     button->last_event_time = now;
+
     if (gpio_read(button->gpio_num) == button->pressed_value) {
         // Record when the button is pressed down.
         button->last_press_time = now;

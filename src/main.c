@@ -176,15 +176,17 @@ void lock_control_point(homekit_value_t value) {
  * Returns the bell state as a homekit value.
  **/
 homekit_value_t doorbell_state_getter() {
-    printf(">> Doorbell state was requested (%s).\n", contact_sensor_state_get(GPIO_BELL) == CONTACT_OPEN ? "open" : "closed");
-    return HOMEKIT_UINT8(contact_sensor_state_get(GPIO_BELL) == CONTACT_OPEN ? 1 : 0);
+    // printf(">> Doorbell state was requested (%s).\n", contact_sensor_state_get(GPIO_BELL) == CONTACT_OPEN ? "ringing" : "silence");
+    // return HOMEKIT_UINT8(contact_sensor_state_get(GPIO_BELL) == CONTACT_OPEN ? 1 : 0);
+    return HOMEKIT_BOOL(contact_sensor_state_get(GPIO_BELL) == CONTACT_OPEN ? 1 : 0);
 }
 
 
 /**
  * The sensor characteristic as global variable.
  **/
-homekit_characteristic_t doorbell_push_characteristic = HOMEKIT_CHARACTERISTIC_(OCCUPANCY_DETECTED, 0);
+// homekit_characteristic_t doorbell_push_characteristic = HOMEKIT_CHARACTERISTIC_(OCCUPANCY_DETECTED, 0);
+homekit_characteristic_t doorbell_push_characteristic = HOMEKIT_CHARACTERISTIC_(MOTION_DETECTED, 0);
 
 
 /**
@@ -194,8 +196,11 @@ void contact_sensor_callback(uint8_t gpio, contact_sensor_state_t state) {
     switch (state) {
         case CONTACT_OPEN:
         case CONTACT_CLOSED:
-            // printf(">> Pushing bell state '%s'.\n", state == CONTACT_OPEN ? "ringing" : "silence");
-            homekit_characteristic_notify(&doorbell_push_characteristic, doorbell_state_getter());
+            led_write(true);
+            doorbell_push_characteristic.value = doorbell_state_getter();
+            printf(">> Pushing bell state '%s'.\n", state == CONTACT_OPEN ? "ringing" : "silence");
+            homekit_characteristic_notify(&doorbell_push_characteristic, doorbell_push_characteristic.value);
+            led_write(false);
             break;
         default:
             printf(">> Unknown bell event: %d\n", state);
@@ -284,7 +289,7 @@ homekit_accessory_t *accessories[] = {
             HOMEKIT_CHARACTERISTIC(IDENTIFY, doorbell_identify),
             NULL
         }),
-        HOMEKIT_SERVICE(OCCUPANCY_SENSOR, .primary=true, .characteristics=(homekit_characteristic_t*[]){
+        HOMEKIT_SERVICE(MOTION_SENSOR, .primary=true, .characteristics=(homekit_characteristic_t*[]){
             HOMEKIT_CHARACTERISTIC(NAME, "Doorbell"),
             &doorbell_push_characteristic,
             NULL

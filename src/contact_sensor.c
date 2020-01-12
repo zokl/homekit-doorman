@@ -36,15 +36,16 @@ void contact_sensor_intr_callback(uint8_t gpio) {
         return;
 
     uint32_t now = xTaskGetTickCountFromISR();
-    if ((now - sensor->last_event_time)*portTICK_PERIOD_MS < sensor->debounce_time) {
+    if ((now - sensor->last_event_time) * portTICK_PERIOD_MS < sensor->debounce_time) {
         // debounce time, ignore events
         return;
     }
     sensor->last_event_time = now;
 
-    sensor->callback(sensor->gpio_num, contact_sensor_state_get(sensor->gpio_num));
-}
+    printf(">>> Stiskunto stale stisknuto....\n");
 
+    sensor->callback(sensor->gpio_num, contact_sensor_state_get(sensor->gpio_num));    
+}
 
 int contact_sensor_create(const uint8_t gpio_num, contact_sensor_callback_fn callback) {
     contact_sensor_t *sensor = contact_sensor_find_by_gpio(gpio_num);
@@ -65,7 +66,7 @@ int contact_sensor_create(const uint8_t gpio_num, contact_sensor_callback_fn cal
     // times in milliseconds
     sensor->debounce_time = BELL_DEBOUNCED_TIME;
 
-    gpio_set_pullup(sensor->gpio_num, true, true);
+    // gpio_set_pullup(sensor->gpio_num, false, true);
     gpio_set_interrupt(sensor->gpio_num, GPIO_INTTYPE_EDGE_ANY, contact_sensor_intr_callback);
 
     return 0;

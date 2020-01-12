@@ -8,7 +8,7 @@
 
 // The GPIO pin that is connected to a button
 // const int button_gpio = 0;
-#define GPIO_BUTTON 14 // WeMos D1 Mini - Pin D8
+#define GPIO_BUTTON 0 // WeMos D1 Mini - Pin D8
 
 // The GPIO pin that is connected to a door bell
 // const int button_gpio = 4;
@@ -32,7 +32,7 @@
 #define BUTTON_DEBOUNCED_TIME 50
 
 // Bell signal debounced time in ms
-#define BELL_DEBOUNCED_TIME 1000
+#define BELL_DEBOUNCED_TIME 100
 
 #define HOMEKIT_PASSWORD "250-68-300"
 #define HOMEKIT_SETUP_ID "1QJ9"
