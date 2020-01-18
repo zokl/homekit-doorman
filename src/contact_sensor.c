@@ -42,8 +42,6 @@ void contact_sensor_intr_callback(uint8_t gpio) {
     }
     sensor->last_event_time = now;
 
-    printf(">>> Stiskunto stale stisknuto....\n");
-
     sensor->callback(sensor->gpio_num, contact_sensor_state_get(sensor->gpio_num));    
 }
 
@@ -64,9 +62,9 @@ int contact_sensor_create(const uint8_t gpio_num, contact_sensor_callback_fn cal
     sensor->last_event_time = now;
 
     // times in milliseconds
-    sensor->debounce_time = BELL_DEBOUNCED_TIME;
+    sensor->debounce_time = DOORBELL_DEBOUNCED_TIME;
 
-    // gpio_set_pullup(sensor->gpio_num, false, true);
+    //gpio_set_pullup(sensor->gpio_num, true, true);
     gpio_set_interrupt(sensor->gpio_num, GPIO_INTTYPE_EDGE_ANY, contact_sensor_intr_callback);
 
     return 0;

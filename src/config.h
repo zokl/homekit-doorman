@@ -31,9 +31,12 @@
 // Button signal debounced time in ms
 #define BUTTON_DEBOUNCED_TIME 50
 
-// Bell signal debounced time in ms
-#define BELL_DEBOUNCED_TIME 100
+// Doorbell signal debounced time in ms
+#define DOORBELL_DEBOUNCED_TIME 20
 
-#define HOMEKIT_PASSWORD "250-68-300"
+// Doorbell notify timeout in ms
+#define DOORBELL_OFF_DELAY 3000
+
+#define HOMEKIT_PASSWORD "111-11-111"
 #define HOMEKIT_SETUP_ID "1QJ9"
 

@@ -23,6 +23,8 @@
 #include "button.h"
 #include "contact_sensor.h"
 
+uint16_t state_old = CONTACT_CLOSED;
+
 void lock_lock();
 void lock_unlock();
 
@@ -45,7 +47,7 @@ void show_config() {
     printf(">> Button bounced time: %d ms\n", BUTTON_DEBOUNCED_TIME);
     printf(">> ------------------------------------------\n");
     printf(">> Doorbell GPIO: %d\n", GPIO_BELL);
-    printf(">> Doorbell bounced interval: %d ms\n", BELL_DEBOUNCED_TIME);
+    printf(">> Doorbell bounced interval: %d ms\n", DOORBELL_DEBOUNCED_TIME);
     printf(">> ------------------------------------------\n");
     printf(">> HomeKit setup id: %s\n", HOMEKIT_SETUP_ID);
     printf(">> HomeKit password: %s\n", HOMEKIT_PASSWORD);
@@ -181,25 +183,46 @@ homekit_value_t doorbell_state_getter() {
     return HOMEKIT_BOOL(contact_sensor_state_get(GPIO_BELL) == CONTACT_OPEN ? 1 : 0);
 }
 
-
 /**
  * The sensor characteristic as global variable.
  **/
 // homekit_characteristic_t doorbell_push_characteristic = HOMEKIT_CHARACTERISTIC_(OCCUPANCY_DETECTED, 0);
 homekit_characteristic_t doorbell_push_characteristic = HOMEKIT_CHARACTERISTIC_(MOTION_DETECTED, 0);
 
-
 /**
  * Called (indirectly) from the interrupt handler to notify the client of a state change.
  **/
+// void contact_sensor_callback(uint8_t gpio, contact_sensor_state_t state) {
+//     switch (state) {
+//         case CONTACT_OPEN:
+//         case CONTACT_CLOSED:
+//             led_write(true);
+//             doorbell_push_characteristic.value = doorbell_state_getter();
+//             printf(">> Pushing bell state '%s'.\n", state == CONTACT_OPEN ? "ringing" : "silence");
+//             homekit_characteristic_notify(&doorbell_push_characteristic, doorbell_push_characteristic.value);
+//             led_write(false);
+//             break;
+//         default:
+//             printf(">> Unknown bell event: %d\n", state);
+//     }
+// }
+
+ETSTimer bell_timer;
+
 void contact_sensor_callback(uint8_t gpio, contact_sensor_state_t state) {
     switch (state) {
         case CONTACT_OPEN:
         case CONTACT_CLOSED:
             led_write(true);
             doorbell_push_characteristic.value = doorbell_state_getter();
-            printf(">> Pushing bell state '%s'.\n", state == CONTACT_OPEN ? "ringing" : "silence");
-            homekit_characteristic_notify(&doorbell_push_characteristic, doorbell_push_characteristic.value);
+            // If doorbell on, start timeout for DOORBELL_OFF_DELAY, after expiration set force homekit notify to off.
+            if (state == CONTACT_OPEN && state_old == CONTACT_CLOSED) {
+                printf("Doorbell ringing !!!\n");
+                homekit_characteristic_notify(&doorbell_push_characteristic, doorbell_push_characteristic.value);
+                printf("Doorbell off delay timer for %d ms is starting ... \n", DOORBELL_OFF_DELAY);
+                sdk_os_timer_arm(&bell_timer, DOORBELL_OFF_DELAY, false);
+                state_old  = CONTACT_OPEN;
+            }
             led_write(false);
             break;
         default:
@@ -230,13 +253,28 @@ void lock_timeout() {
     lock_lock();
 }
 
+// Doorbell timeout callback
+void doorbell_timeout() {
+    printf("Forcing doorbell homekit notification off \n"); 
+    sdk_os_timer_disarm(&bell_timer);
+    homekit_characteristic_notify(&doorbell_push_characteristic, HOMEKIT_BOOL(CONTACT_CLOSED));
+    state_old = CONTACT_CLOSED;
+}
+
 void lock_init() {
     lock_current_state.value = HOMEKIT_UINT8(lock_state_secured);
     homekit_characteristic_notify(&lock_current_state, lock_current_state.value);
-    homekit_characteristic_notify(&doorbell_push_characteristic, doorbell_state_getter());
 
     sdk_os_timer_disarm(&lock_timer);
     sdk_os_timer_setfn(&lock_timer, lock_timeout, NULL);
+
+}
+
+void  doorbell_init () {
+    homekit_characteristic_notify(&doorbell_push_characteristic, doorbell_state_getter());
+
+    sdk_os_timer_disarm(&bell_timer);
+    sdk_os_timer_setfn(&bell_timer, doorbell_timeout, NULL);
 }
 
 void lock_unlock() {
@@ -331,6 +369,7 @@ void user_init(void) {
     wifi_config_init("doorman", NULL, on_wifi_ready);
     gpio_init();
     lock_init();
+    doorbell_init();
 
     if (button_create(GPIO_BUTTON, BUTTON_PRESSED_EXPECTED_VALUE, BUTTON_LONG_PRESS_TIMEOUT, button_callback)) {
         printf("> Failed to initialize button\n");
