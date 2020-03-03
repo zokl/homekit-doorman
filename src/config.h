@@ -4,11 +4,11 @@
 #define GPIO_RELAY 5 // WeMos D1 Mini - Pin D1
 
 // The GPIO pin that is connected to a LED
-#define GPIO_LED 2 //WeMos D1 Mini - Pin Internal LED (Blue)
+#define GPIO_LED 2 //WeMos D1 Mini - Pin D4 (Internal Blue LED)
 
 // The GPIO pin that is connected to a button
 // const int button_gpio = 0;
-#define GPIO_BUTTON 0 // WeMos D1 Mini - Pin D8
+#define GPIO_BUTTON 0 // WeMos D1 Mini - Pin D3
 
 // The GPIO pin that is connected to a door bell
 // const int button_gpio = 4;
@@ -37,6 +37,6 @@
 // Doorbell notify timeout in ms
 #define DOORBELL_OFF_DELAY 3000
 
-#define HOMEKIT_PASSWORD "111-11-111"
+#define HOMEKIT_PASSWORD "250-68-301"
 #define HOMEKIT_SETUP_ID "1QJ9"
 
