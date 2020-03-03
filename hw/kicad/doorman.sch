@@ -14,17 +14,6 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L wemos_mini:WeMos_mini U1
-U 1 1 5E1CE043
-P 4700 3800
-F 0 "U1" H 4700 4437 60  0000 C CNN
-F 1 "WeMos_mini" H 4700 4331 60  0000 C CNN
-F 2 "Module:WEMOS_D1_mini_light" H 5250 3100 60  0001 C CNN
-F 3 "" H 4700 4331 60  0001 C CNN
-	1    4700 3800
-	-1   0    0    -1  
-$EndComp
-$Comp
 L Transistor_BJT:BC337 Q1
 U 1 1 5E1CEC48
 P 6800 3250
@@ -207,12 +196,12 @@ $EndComp
 $Comp
 L power:+3.3V #PWR0102
 U 1 1 5E207504
-P 4100 3400
-F 0 "#PWR0102" H 4100 3250 50  0001 C CNN
-F 1 "+3.3V" H 4115 3573 50  0000 C CNN
-F 2 "" H 4100 3400 50  0001 C CNN
-F 3 "" H 4100 3400 50  0001 C CNN
-	1    4100 3400
+P 5300 3400
+F 0 "#PWR0102" H 5300 3250 50  0001 C CNN
+F 1 "+3.3V" H 5315 3573 50  0000 C CNN
+F 2 "" H 5300 3400 50  0001 C CNN
+F 3 "" H 5300 3400 50  0001 C CNN
+	1    5300 3400
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
@@ -222,12 +211,12 @@ Wire Wire Line
 $Comp
 L power:+5V #PWR0103
 U 1 1 5E2086DC
-P 5300 3400
-F 0 "#PWR0103" H 5300 3250 50  0001 C CNN
-F 1 "+5V" H 5315 3573 50  0000 C CNN
-F 2 "" H 5300 3400 50  0001 C CNN
-F 3 "" H 5300 3400 50  0001 C CNN
-	1    5300 3400
+P 4100 3400
+F 0 "#PWR0103" H 4100 3250 50  0001 C CNN
+F 1 "+5V" H 4115 3573 50  0000 C CNN
+F 2 "" H 4100 3400 50  0001 C CNN
+F 3 "" H 4100 3400 50  0001 C CNN
+	1    4100 3400
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
@@ -237,12 +226,12 @@ Wire Wire Line
 $Comp
 L power:GND #PWR0104
 U 1 1 5E2094AF
-P 5500 3400
-F 0 "#PWR0104" H 5500 3150 50  0001 C CNN
-F 1 "GND" H 5505 3227 50  0000 C CNN
-F 2 "" H 5500 3400 50  0001 C CNN
-F 3 "" H 5500 3400 50  0001 C CNN
-	1    5500 3400
+P 3900 3400
+F 0 "#PWR0104" H 3900 3150 50  0001 C CNN
+F 1 "GND" H 3905 3227 50  0000 C CNN
+F 2 "" H 3900 3400 50  0001 C CNN
+F 3 "" H 3900 3400 50  0001 C CNN
+	1    3900 3400
 	1    0    0    1   
 $EndComp
 $Comp
@@ -265,10 +254,6 @@ Wire Wire Line
 Wire Wire Line
 	6600 4550 6600 4700
 Connection ~ 6600 4700
-Wire Wire Line
-	5200 3550 5500 3550
-Wire Wire Line
-	5500 3550 5500 3400
 Wire Wire Line
 	6600 5400 6600 5550
 Wire Wire Line
@@ -384,11 +369,11 @@ Wire Wire Line
 	4950 5250 5100 5250
 Wire Wire Line
 	5100 5250 5100 5450
-Text GLabel 5200 3750 2    50   Input ~ 0
+Text GLabel 4200 3950 0    50   Input ~ 0
 Lock
-Text GLabel 5200 3850 2    50   Input ~ 0
+Text GLabel 4200 3850 0    50   Input ~ 0
 RingDet
-Text GLabel 5200 3950 2    50   Input ~ 0
+Text GLabel 4200 3750 0    50   Input ~ 0
 Butt
 Text GLabel 6150 3250 0    50   Input ~ 0
 Lock
@@ -450,4 +435,19 @@ F 3 "~" H 5300 2200 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	8500 4500 8500 4750
+Wire Wire Line
+	4200 3550 3900 3550
+Wire Wire Line
+	3900 3550 3900 3400
+$Comp
+L wemos_mini:WeMos_mini U1
+U 1 1 5E1CE043
+P 4700 3800
+F 0 "U1" H 4700 4437 60  0000 C CNN
+F 1 "WeMos_mini" H 4700 4331 60  0000 C CNN
+F 2 "Module:WEMOS_D1_mini_light" H 5250 3100 60  0001 C CNN
+F 3 "" H 4700 4331 60  0001 C CNN
+	1    4700 3800
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
