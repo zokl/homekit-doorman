@@ -5,8 +5,8 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "Doorman Homekit System"
-Date "2020-01-13"
-Rev "1.0"
+Date "2020-03-07"
+Rev "1.1"
 Comp ""
 Comment1 ""
 Comment2 ""

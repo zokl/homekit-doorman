@@ -1,3 +1,4 @@
 (sym_lib_table
   (lib (name wemos_mini)(type Legacy)(uri /Users/zokl/Documents/Projekty/HomeWork/DoorMan/wemos-d1-mini-kicad/libraries/wemos_mini.lib)(options "")(descr ""))
+  (lib (name doorman-rescue)(type Legacy)(uri ${KIPRJMOD}/doorman-rescue.lib)(options "")(descr ""))
 )
