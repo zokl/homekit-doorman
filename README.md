@@ -29,7 +29,7 @@ The initial configuration could be modified in the file [config.h](https://githu
 
 ## PCB Design
 
-PCB is designed for using in DIN rail box [Z103J ABS V0](https://github.com/zokl/homekit-doorman/blob/master/doc/dsh.627-099.1.pdf) with AC/DC power supply [MEAN WELL DR-15-5](https://github.com/zokl/homekit-doorman/blob/master/doc/dsh.751-263.1.pdf).
+PCB is designed for using in DIN rail box [Z103J ABS V0 KRADEX](https://github.com/zokl/homekit-doorman/blob/master/doc/dsh.627-099.1.pdf) with AC/DC power supply [MEAN WELL DR-15-5](https://github.com/zokl/homekit-doorman/blob/master/doc/dsh.751-263.1.pdf).
 
 ![Doorman v 1.1 - schematics](/hw/kicad_1v1/pictures/Doorman_1v1_schematics.png)
 
