@@ -37,6 +37,6 @@
 // Doorbell notify timeout in ms
 #define DOORBELL_OFF_DELAY 3000
 
-#define HOMEKIT_PASSWORD "250-68-301"
+#define HOMEKIT_PASSWORD "111-00-111"
 #define HOMEKIT_SETUP_ID "1QJ9"
 
