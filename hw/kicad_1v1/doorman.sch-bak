@@ -7,8 +7,8 @@ Sheet 1 1
 Title "Doorman Homekit System"
 Date "2020-03-07"
 Rev "1.1"
-Comp "Zbyněk Kocur"
-Comment1 "Based on ESP8266 WeMos D1 Mini"
+Comp ""
+Comment1 ""
 Comment2 ""
 Comment3 ""
 Comment4 ""
@@ -444,7 +444,7 @@ L wemos_mini:WeMos_mini U1
 U 1 1 5E1CE043
 P 3800 3800
 F 0 "U1" H 3800 4437 60  0000 C CNN
-F 1 "WeMos_D1_Mini" H 3800 4331 60  0000 C CNN
+F 1 "WeMos_D1_mini" H 3800 4331 60  0000 C CNN
 F 2 "Module:WEMOS_D1_mini_light" H 4350 3100 60  0001 C CNN
 F 3 "" H 3800 4331 60  0001 C CNN
 	1    3800 3800
