@@ -6,7 +6,7 @@ The SW part of the project is based on  https://github.com/maximkulkin/esp-homek
 ## Fermax phone interconnection
 
 Fermax phone signals:
-* **Bell** - ringing detector
+* **RingDet** - ringing detector
    * **3** - common (- on PCB)
    * **4** - call (+ on PCB)
 * **Lock** - door lock control
