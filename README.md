@@ -1,5 +1,5 @@
 # Doorman HomeKit System
-System of a doorbell and smart lock integration into Apple HomeKit. The project platform is ESP8266 - WeMos D1 Mini.
+System of a doorbell and smart lock integration into Apple HomeKit. The project platform is ESP8266 - WeMos D1 Mini. Target door phone system is [Fermax](https://github.com/zokl/homekit-doorman/blob/master/doc/Fermax%20CityMax%20Universal%20%20Intercom%20Handset%20Data%20Sheet.pdf).
 
 The SW part of the project is based on  https://github.com/maximkulkin/esp-homekit-demo.
 
