@@ -3,6 +3,16 @@ System of a doorbell and smart lock integration into Apple HomeKit. The project 
 
 The SW part of the project is based on  https://github.com/maximkulkin/esp-homekit-demo.
 
+## Fermax phone interconnection
+
+Fermax phone signals:
+* **Bell** - ringing detector
+   * **3** - common (- on PCB)
+   * **4** - call (+ on PCB)
+* **Lock** - door lock control
+   * **1** - door opener and microphone supply (+ on PCB)
+   * **3** - common (+ on PCB)
+
 ## Initial configuration
 
 The initial configuration could be modified in the file [config.h](https://github.com/zokl/homekit-doorman/blob/master/src/config.h).
